@@ -5,6 +5,7 @@ const WIN_Z = 0;  // default graphics window z coord in world space
 const WIN_LEFT = 0; const WIN_RIGHT = 1;  // default left and right x coords in world space
 const WIN_BOTTOM = 0; const WIN_TOP = 1;  // default top and bottom y coords in world space
 const INPUT_TRIANGLES_URL = "https://ncsucgclass.github.io/prog2/triangles.json"; // triangles file loc
+const NEW_INPUT_TRIANGLES_URL = "trianglespt5.json"; // new triangles file loc
 const INPUT_SPHERES_URL = "https://ncsucgclass.github.io/prog2/spheres.json"; // spheres file loc
 var Eye = new vec4.fromValues(0.5,0.5,-0.5,1.0); // default eye position in world space
 
@@ -71,9 +72,10 @@ function setupWebGL() {
 } // end setupWebGL
 
 // read triangles in, load them into webgl buffers
-function loadTriangles() {
-    var inputTriangles = getJSONFile(INPUT_TRIANGLES_URL,"triangles");
-    if (inputTriangles != String.null) { 
+function loadTriangles(file_path) {
+    // var inputTriangles = getJSONFile(INPUT_TRIANGLES_URL,"triangles");
+    var inputTriangles = getJSONFile(file_path,"triangles");
+    if (inputTriangles != String.null) {  
         var whichSetVert; // index of vertex in current triangle set
         var whichSetTri; // index of triangle in current triangle set
         var coordArray = []; // 1D array of vertex coords for WebGL
@@ -196,13 +198,33 @@ function renderTriangles() {
 } // end render triangles
 
 
+let currentView = 0;
+
+function render() {
+    if (currentView == 0) {
+        setupWebGL(); // set up the webGL environment
+        loadTriangles(INPUT_TRIANGLES_URL); // load in the triangles from tri file
+        setupShaders(); // setup the webGL shaders
+        renderTriangles(); // draw the triangles using webGL
+    } else {
+        setupWebGL(); // set up the webGL environment
+        loadTriangles(NEW_INPUT_TRIANGLES_URL); // load in the triangles from tri file
+        setupShaders(); // setup the webGL shaders
+        renderTriangles(); // draw the triangles using webGL
+    }
+}
+
 /* MAIN -- HERE is where execution begins after window load */
 
 function main() {
-  
-  setupWebGL(); // set up the webGL environment
-  loadTriangles(); // load in the triangles from tri file
-  setupShaders(); // setup the webGL shaders
-  renderTriangles(); // draw the triangles using webGL
+    render();
+
+    window.addEventListener("keydown", function(event) {
+        if (event.code == "Space" || event.key == " ") {
+            currentView = (currentView + 1) % 2;
+            render();
+        }
+    });
+    
   
 } // end main
